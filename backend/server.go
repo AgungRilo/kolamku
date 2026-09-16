@@ -11,19 +11,29 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/AgungRilo/kolamku/backend/graph"
+	"github.com/AgungRilo/kolamku/backend/internal/config"
+	"github.com/AgungRilo/kolamku/backend/internal/database"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
 const defaultPort = "8080"
 
 func main() {
+	cfg := config.Load()
+	log.Printf("config loaded — database dikonfigurasi: %v", cfg.DatabaseURL != "")
+	pool, err := database.Connect(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("koneksi database gagal: %v", err)
+	}
+	defer pool.Close()
+	log.Println("database terkoneksi")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-
+	// srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: pool}}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
@@ -40,4 +50,5 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
 }
