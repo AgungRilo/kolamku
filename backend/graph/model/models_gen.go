@@ -13,6 +13,12 @@ type NewTodo struct {
 type Query struct {
 }
 
+type Role struct {
+	ID          int32   `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+}
+
 type Todo struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`

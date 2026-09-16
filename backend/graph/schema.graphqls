@@ -9,6 +9,12 @@ type Todo {
   user: User!
 }
 
+type Role {
+  id: Int!
+  name: String!
+  description: String
+}
+
 type User {
   id: ID!
   name: String!
@@ -16,6 +22,7 @@ type User {
 
 type Query {
   todos: [Todo!]!
+  roles: [Role!]!
 }
 
 input NewTodo {

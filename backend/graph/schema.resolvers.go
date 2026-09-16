@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/AgungRilo/kolamku/backend/graph/model"
+	"github.com/AgungRilo/kolamku/backend/internal/db/sqlcgen"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -20,6 +21,35 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	panic(fmt.Errorf("not implemented: Todos - todos"))
+}
+
+// Roles is the resolver for the roles field.
+func (r *queryResolver) Roles(ctx context.Context) ([]*model.Role, error) {
+	// 1. Bikin query object sqlc, kasih pool DB dari resolver.
+	queries := sqlcgen.New(r.DB)
+
+	// 2. Panggil query SQL ListRoles (baca dari tabel roles).
+	rows, err := queries.ListRoles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Terjemahkan hasil sqlc -> model GraphQL (dua tipe Role yang beda).
+	var result []*model.Role
+	for _, row := range rows {
+		role := &model.Role{
+			ID:   row.ID,
+			Name: row.Name,
+		}
+		// description nullable: cuma isi kalau ada nilainya (Valid = true).
+		if row.Description.Valid {
+			desc := row.Description.String
+			role.Description = &desc
+		}
+		result = append(result, role)
+	}
+
+	return result, nil
 }
 
 // Mutation returns MutationResolver implementation.
