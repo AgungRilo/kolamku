@@ -17,6 +17,22 @@ type Role {
 
 type User {
   id: ID!
+  email: String!
+  username: String!
+  name: String!
+  isSuperadmin: Boolean!
+  isActive: Boolean!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+input RegisterInput {
+  email: String!
+  username: String!
+  password: String!
   name: String!
 }
 
@@ -25,11 +41,7 @@ type Query {
   roles: [Role!]!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  register(input: RegisterInput!): User!
 }

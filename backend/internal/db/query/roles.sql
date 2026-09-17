@@ -1,3 +1,4 @@
+-- name: ListRoles :many
 SELECT
   id,
   name,

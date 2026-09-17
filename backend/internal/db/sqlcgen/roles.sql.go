@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const listRoles = `
+const listRoles = `-- name: ListRoles :many
 SELECT
   id,
   name,

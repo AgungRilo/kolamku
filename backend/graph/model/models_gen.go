@@ -13,6 +13,13 @@ type NewTodo struct {
 type Query struct {
 }
 
+type RegisterInput struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
 type Role struct {
 	ID          int32   `json:"id"`
 	Name        string  `json:"name"`
@@ -27,6 +34,10 @@ type Todo struct {
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID           string `json:"id"`
+	Email        string `json:"email"`
+	Username     string `json:"username"`
+	Name         string `json:"name"`
+	IsSuperadmin bool   `json:"isSuperadmin"`
+	IsActive     bool   `json:"isActive"`
 }

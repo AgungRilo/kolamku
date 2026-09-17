@@ -11,11 +11,43 @@ import (
 
 	"github.com/AgungRilo/kolamku/backend/graph/model"
 	"github.com/AgungRilo/kolamku/backend/internal/db/sqlcgen"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+}
+
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.User, error) {
+	// 1. Hash password mentah dari user. JANGAN pernah simpan password asli.
+	hashed, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("gagal hash password: %w", err)
+	}
+
+	// 2. Insert user baru lewat sqlc.
+	queries := sqlcgen.New(r.DB)
+	row, err := queries.CreateUser(ctx, sqlcgen.CreateUserParams{
+		Email:        input.Email,
+		Username:     input.Username,
+		PasswordHash: string(hashed),
+		Name:         input.Name,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("gagal membuat user: %w", err)
+	}
+
+	// 3. Map hasil DB -> model GraphQL.
+	return &model.User{
+		ID:           row.ID.String(),
+		Email:        row.Email,
+		Username:     row.Username,
+		Name:         row.Name,
+		IsSuperadmin: row.IsSuperadmin,
+		IsActive:     row.IsActive,
+	}, nil
 }
 
 // Todos is the resolver for the todos field.
